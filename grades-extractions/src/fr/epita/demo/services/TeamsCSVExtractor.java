@@ -5,7 +5,9 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import fr.epita.demo.datamodel.Assignment;
@@ -14,8 +16,10 @@ import fr.epita.demo.datamodel.Student;
 
 public class TeamsCSVExtractor {
 
+
+	private Map<String, Student> studentMap = new LinkedHashMap<>();
 	private final String delim;
-	private List<Result> results;
+	private List<Result> results = new ArrayList<>();
 
 	public TeamsCSVExtractor(String delim) {
 		this.delim = delim;
@@ -43,7 +47,22 @@ public class TeamsCSVExtractor {
 			if (assignment.getMaxGrade() == null) {
 				assignment.setMaxGrade(Double.parseDouble(parts[4]));
 			}
-			Student student = new Student(parts[0], parts[1], parts[2]);
+			Student readStudent = new Student(parts[0], parts[1], parts[2]);
+//			if (!studentMap.containsKey(readStudent.getEmail())){
+//				studentMap.put(readStudent.getEmail(), readStudent);
+//			}
+//  alternative :
+//			Student student = studentMap.get(parts[2]);
+//			if (student == null){
+//
+//				studentMap.put(parts[2], readStudent);
+//			}
+//	alternative :
+
+			Student student = studentMap.computeIfAbsent(parts[2], k -> readStudent);
+
+
+			//new Student(parts[0], parts[1], parts[2]);
 			String gradeAsString = parts[3];
 			Double actualGrade = 0.0;
 			if (!gradeAsString.isEmpty()){
@@ -59,7 +78,7 @@ public class TeamsCSVExtractor {
 		return results;
 	}
 
-	public void readFromFile(String pathname, String delim) throws IOException {
+	public TeamsCSVExtractor read(String pathname, String delim) throws IOException {
 
 		List<String> lines = Files.readAllLines(new File(pathname).toPath(), StandardCharsets.ISO_8859_1);
 		System.out.println(lines.size());
@@ -71,12 +90,12 @@ public class TeamsCSVExtractor {
 			assignment.setName(split[3]);
 		} else {
 			//we have a structure problem
-			return;
+			return this;
 		}
 
-		this.results = this.extractResults(lines, assignment);
+		this.results.addAll(this.extractResults(lines, assignment));
 
-
+		return this;
 	}
 
 	public List<Result> getResults() {

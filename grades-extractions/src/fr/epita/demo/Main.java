@@ -1,13 +1,9 @@
 package fr.epita.demo;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
-import fr.epita.demo.datamodel.Assignment;
 import fr.epita.demo.datamodel.Result;
 import fr.epita.demo.services.TeamsCSVExtractor;
 
@@ -22,9 +18,29 @@ public class Main {
 		String secondPathName = "S:/downloads/assignment2.csv";
 
 		TeamsCSVExtractor extractor = new TeamsCSVExtractor(DELIM);
-		extractor.readFromFile(pathname, DELIM);
-		extractor.getResultsFromAssignmentName("Complete the ddl provided");
+		extractor.read(pathname, DELIM)
+				.read(secondPathName, DELIM);
 
-		System.out.println(extractor.getResults());
+		List<Result> assignment1Result = extractor.getResultsFromAssignmentName("Complete the ddl provided");
+
+		Double average = assignment1Result
+				.stream()
+				.mapToDouble(Result::getGrade)    //"map"
+				.average().getAsDouble();//"reduce"
+
+		System.out.println(average);
+
+		Map<Double, Integer> gradesDistribution = new LinkedHashMap<>();
+		for (Result result : assignment1Result){
+			Double grade = result.getGrade();
+			Integer actualCount = gradesDistribution.get(grade);
+			gradesDistribution.put(grade , actualCount == null ? 1 : actualCount + 1);
+		}
+		System.out.println(gradesDistribution);
+		//5.0 : ==
+		//4.0 : ====
+		//3.0 : ==
+
+		System.out.println(assignment1Result.size());
 	}
 }
