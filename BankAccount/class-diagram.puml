@@ -1,0 +1,49 @@
+@startuml
+class Customer {
+  address : String
+  name : String
+}
+
+
+
+class Account {
+   balance : Float
+}
+
+
+
+class InvestmentAccount {
+
+}
+class SavingsAccount {
+    interestRate : Float
+}
+
+
+
+class Stock{
+    name : String
+    currentPrice : Float
+}
+
+
+
+class StockOrder{
+    commission : Float
+    quantity : Integer
+
+
+}
+
+Customer "1" -- "*" Account
+Account <|-- InvestmentAccount
+Account <|-- SavingsAccount
+StockOrder "*" o-- "1" InvestmentAccount
+StockOrder "*" o-- "1" Stock
+
+
+
+
+
+
+@enduml
